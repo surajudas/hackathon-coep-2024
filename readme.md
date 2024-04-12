@@ -1,9 +1,9 @@
 ## Plagiarisation Detection Using Statistics and ML with Moodle integration.
 
-Team Leader: Suraj Das
+Team Leader: Suraj Das  
 Members: 
 - Ujjwal Mahajan
 - Atharva Thakur
 - Shreyas Mekhe
-- Anshul 
+- Anshul Satbadre
 - Sahil Makeshwar
