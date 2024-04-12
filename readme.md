@@ -1,4 +1,4 @@
-Plagiarisation Detection Using Statistics and ML with Moodle integration.
+## Plagiarisation Detection Using Statistics and ML with Moodle integration.
 
 Team Leader: Suraj Das
 Members: 
