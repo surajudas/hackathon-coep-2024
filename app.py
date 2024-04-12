@@ -8,6 +8,12 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+def get_jaccard_sim(str1, str2): 
+    a = set(str1.split()) 
+    b = set(str2.split())
+    c = a.intersection(b)
+    return float(len(c)) / (len(a) + len(b) - len(c))
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -38,5 +44,41 @@ def upload_file():
       <input type=submit value=Upload>
     </form>
     '''
+@app.route('/view')
+def view():
+    score = get_jaccard_sim('hello world', 'hello world')
+    print(score)
+    return f"Jaccard Similarity Score: {score}"
+
+@app.route('/view2', methods=['GET', 'POST'])
+def view2():
+    if request.method == 'POST':
+        file1 = request.files['file1']
+        file2 = request.files['file2']
+
+        file1_name = secure_filename(file1.filename)
+        file2_name = secure_filename(file2.filename)
+
+        file1.save(os.path.join('/tmp', file1_name))
+        file2.save(os.path.join('/tmp', file2_name))
+
+        with open(os.path.join('/tmp', file1_name), 'r') as f:
+            text1 = f.read()
+
+        with open(os.path.join('/tmp', file2_name), 'r') as f:
+            text2 = f.read()
+
+        score = get_jaccard_sim(text1, text2)
+        return f"Jaccard Similarity Score: {score}"
+    else:
+        return '''
+        <h1>Upload two files to compare</h1>
+        <form method=post enctype=multipart/form-data>
+          <input type=file name=file1>
+          <input type=file name=file2>
+          <input type=submit value=Upload>
+        </form>
+        '''
+
 if __name__ == '__main__':
     app.run()
