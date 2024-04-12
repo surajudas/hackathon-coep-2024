@@ -1,9 +1,13 @@
 import os
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
+import zipfile
+import batch_reader
 
-UPLOAD_FOLDER = '/path/to/the/uploads'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'js'}
+## Routes: '/':for 2 files and '/batch_upload'
+
+UPLOAD_FOLDER = '/uploads'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'js', 'py'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -53,6 +57,43 @@ def main():
           <input type=submit value=Upload>
         </form>
         '''
+
+@app.route('/batch_upload')
+def upload_form():
+    return '''
+    <html>
+    <body>
+    <form method="POST" action="/upload_zip" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit">
+    </form>
+    </body>
+    </html>
+    '''    
+@app.route('/upload_zip', methods=['POST'])
+def upload_zip():
+    if 'file' not in request.files:
+        return 'No file part'
+    file = request.files['file']
+    filename = secure_filename(file.filename)
+    file.save(filename)
+
+    with zipfile.ZipFile(filename, 'r') as zip_ref:
+        zip_ref.extractall('unzipped_files')
+
+    file_paths = [os.path.join('unzipped_files', name) for name in os.listdir('unzipped_files')]
+
+    plot_paths = batch_reader.docs_content_reader(file_paths)
+    
+    html = f'''<html>
+    <body>
+    <img src="{plot_paths[0]}" alt="Heatmap">
+    <img src="{plot_paths[1]}" alt="Heatmap">
+    </body>
+    </html>'''
+
+    # Return the HTML string
+    return html
 
 if __name__ == '__main__':
     app.run()
